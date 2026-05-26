@@ -1,0 +1,55 @@
+folio_version: "0.1"
+generated_at: 2026-05-25T22:57:22.126483-05:00
+generator: folio/0.1.0
+presets:
+  - id: go-lib
+    version: 0.1.0
+    source: bundled
+    resolved_path: bundled:presets/go-lib
+inputs:
+  copyright_holder: Hollis Labs
+  description: Fast, auditable classification, normalization, and repair pipeline for harness IO (commands, tool output, envelopes, tags)
+  github_owner: hollis-labs
+  go_version: 1.26.1
+  package_name: harnessfilters
+  repo_name: go-harness-filters
+computed:
+  module_path: github.com/hollis-labs/go-harness-filters
+  year: "2026"
+files:
+  .github/workflows/check.yml:
+    preset: go-lib
+    digest_at_gen: sha256:aac94411d0d8efc16c742a9dd048689ede1c8b84c8d6984a5d80fea09fb295d5
+  .gitignore:
+    preset: go-lib
+    digest_at_gen: sha256:1abae72d1b570e1dca6465bad43ba51f8a19bf92dd09eb9e6692d2b143282b4a
+  CHANGELOG.md:
+    preset: go-lib
+    digest_at_gen: sha256:dfa83d256a608e22abc7c10d6b91ba6f83d2969083eb57d7bfcf010cb805d41b
+  LICENSE:
+    preset: go-lib
+    digest_at_gen: sha256:29fde794587339581b8d68aa7753337b321da45cbe49cf5a0be907db7e67e7d8
+  README.md:
+    preset: go-lib
+    digest_at_gen: sha256:260fb98821417a63ab166ecef44a7d74347e571eafc1c327714bdc8252535c4f
+  examples/README.md:
+    preset: go-lib
+    digest_at_gen: sha256:57000c332d665a1d299177c34e92ca029752d7e2f37d12318d53d490a6b51e55
+  go.mod:
+    preset: go-lib
+    digest_at_gen: sha256:af1bd864c6b76588c52d84e5158df6748c22f5a34171d9f393fe8434359c17be
+  harnessfilters/doc.go:
+    preset: go-lib
+    digest_at_gen: sha256:41181b7c765fa77197d7f5485e3069440b41d0e7b0ad6ebfe22f3d160598119a
+  harnessfilters/harnessfilters.go:
+    preset: go-lib
+    digest_at_gen: sha256:346466c776d85528eba5401f7c91d9a8a39a6f2000985cdfe38c2ecbd6f4b218
+  harnessfilters/harnessfilters_test.go:
+    preset: go-lib
+    digest_at_gen: sha256:0a06835c67e7c655c447074f6e346b08a479ebe7baac9d6002f76f9b11b38517
+sync_history:
+  - at: 2026-05-25T22:57:22.126483-05:00
+    operation: init
+    presets:
+      - id: go-lib
+        version: 0.1.0
