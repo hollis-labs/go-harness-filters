@@ -7,7 +7,7 @@ Tether, Hadron, Tesseract, and Stack Explorer.
 
 ## Status (v0.1.0, 2026-05-26)
 
-Two subpackages are callable today:
+Four subpackages are callable today:
 
 - **`directive/`** — full `@namespace:action key=value` parser with
   strict validation, quoted values, escape handling, and provenance
@@ -17,10 +17,16 @@ Two subpackages are callable today:
   bare commands AND JSON-encoded tool_use payloads via word
   boundaries; recommends the Cerberus deploy/reload pair; marked
   `Reversible=false` so the policy layer defaults to nudge).
+- **`normalize/`** — `SlugNormalizer` for conservative lowercase,
+  hyphen-separated tag/name/path canonicalization with aliases,
+  reserved-term rejection, provenance, and optional simple singularizing.
+- **`repair/`** — deterministic `MissingClosingDelimiterJSON` repair
+  plus `Chain` composition. It only appends missing `}` / `]` delimiters
+  when the repaired document validates as JSON; it does not insert
+  commas, quotes, keys, or values.
 
-The remaining subpackages (`normalize/`, `repair/`, `event/`) ship
-their contracts (interfaces, types, schemas) but no concrete rule sets
-yet — concrete impls land per-domain as consumers come online.
+The remaining `event/` subpackage ships its schema but no reference
+emitter helper yet.
 
 27 tests across 5 packages, all `-race` clean.
 
@@ -82,8 +88,8 @@ engine := &classifybridge.Engine{Classifier: rules}
 |---|---|---|
 | `directive/` | Parser for the `@namespace:action key=value` directive syntax. Strict by design — silent malformed-directive handling would let agents submit near-misses that don't do what they look like. | **Callable** |
 | `classify/` | `Classifier` interface, `RuleSet` driver, `Rule` type (exact / regex matchers), and the worked `NaniteDeployRule` from the architecture doc. | **Callable** |
-| `normalize/` | Canonicalization contract for tags, slugs, names, paths. Concrete domain rules (Tesseract first) land separately. | Contract only |
-| `repair/` | Narrow deterministic repair contract for malformed envelopes, JSON, MCP calls. Never auto-repairs destructive commands; never auto-applies semantic-changing repairs. | Contract only |
+| `normalize/` | Canonicalization contract plus `SlugNormalizer` for conservative tags/slugs/names/paths. | **Callable** |
+| `repair/` | Narrow deterministic repair contract plus `Chain` and `MissingClosingDelimiterJSON`. Never auto-repairs destructive commands; never auto-applies semantic-changing repairs. | **Callable** |
 | `event/` | Normalized filter-event schema for downstream consumers. Separate from `go-runtime-events` because filter events describe pipeline output, not process activity. | Schema only |
 
 ## Architecture notes

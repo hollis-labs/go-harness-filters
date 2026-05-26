@@ -1,5 +1,10 @@
 package normalize
 
+import (
+	"strings"
+	"unicode"
+)
+
 // Normalizer canonicalizes one input value into a stable form, returning
 // the normalized output plus provenance so callers can store both
 // alongside each other.
@@ -46,4 +51,112 @@ type Config struct {
 	// silently transform. Useful for keywords downstream systems
 	// already reserved (e.g., "system", "admin", "root").
 	Reserved []string
+}
+
+// SlugNormalizer canonicalizes free-form names/tags into lowercase
+// hyphen-separated slugs. It is intentionally conservative: unknown
+// punctuation collapses to hyphens, reserved terms are rejected, and
+// aliases are applied after the initial slug pass.
+type SlugNormalizer struct {
+	Config Config
+
+	// Singularize strips a trailing "s" from simple plural-looking words.
+	// It is deliberately basic; domain-specific taxonomies should layer
+	// richer morphology outside this generic normalizer.
+	Singularize bool
+}
+
+// NewSlugNormalizer returns a conservative slug normalizer.
+func NewSlugNormalizer(cfg Config) SlugNormalizer {
+	return SlugNormalizer{Config: cfg}
+}
+
+// Normalize implements [Normalizer].
+func (n SlugNormalizer) Normalize(input string) Result {
+	original := input
+	slug := slugify(input)
+	if n.Singularize {
+		slug = singularizeSlug(slug)
+	}
+	if slug == "" {
+		return Result{Original: original, Rejected: true, Reason: "normalize.empty"}
+	}
+
+	if alias, ok := lookupAlias(n.Config.Aliases, slug); ok {
+		slug = alias
+		if n.Singularize {
+			slug = singularizeSlug(slug)
+		}
+		if isReserved(slug, n.Config.Reserved) {
+			return Result{Original: original, Rejected: true, Reason: "normalize.reserved"}
+		}
+		return Result{
+			Original:   original,
+			Normalized: slug,
+			AliasOf:    slug,
+			Reason:     "normalize.alias",
+		}
+	}
+
+	if isReserved(slug, n.Config.Reserved) {
+		return Result{Original: original, Rejected: true, Reason: "normalize.reserved"}
+	}
+	return Result{Original: original, Normalized: slug}
+}
+
+func slugify(input string) string {
+	var b strings.Builder
+	lastHyphen := false
+	for _, r := range strings.TrimSpace(strings.ToLower(input)) {
+		switch {
+		case unicode.IsLetter(r) || unicode.IsDigit(r):
+			b.WriteRune(r)
+			lastHyphen = false
+		case unicode.IsSpace(r) || r == '-' || r == '_' || r == '/' || r == '.':
+			if b.Len() > 0 && !lastHyphen {
+				b.WriteByte('-')
+				lastHyphen = true
+			}
+		default:
+			if b.Len() > 0 && !lastHyphen {
+				b.WriteByte('-')
+				lastHyphen = true
+			}
+		}
+	}
+	return strings.Trim(b.String(), "-")
+}
+
+func singularizeSlug(slug string) string {
+	parts := strings.Split(slug, "-")
+	for i, p := range parts {
+		if len(p) > 3 && strings.HasSuffix(p, "s") && !strings.HasSuffix(p, "ss") {
+			parts[i] = strings.TrimSuffix(p, "s")
+		}
+	}
+	return strings.Join(parts, "-")
+}
+
+func lookupAlias(aliases map[string]string, slug string) (string, bool) {
+	if len(aliases) == 0 {
+		return "", false
+	}
+	if alias, ok := aliases[slug]; ok {
+		return slugify(alias), true
+	}
+	for k, v := range aliases {
+		if slugify(k) == slug {
+			return slugify(v), true
+		}
+	}
+	return "", false
+}
+
+func isReserved(slug string, reserved []string) bool {
+	for _, r := range reserved {
+		if slugify(r) == slug {
+			return true
+		}
+	}
+	return false
 }

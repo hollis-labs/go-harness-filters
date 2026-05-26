@@ -14,19 +14,21 @@ Status as of v0.1.0 (2026-05-26). See
 
 ### Concrete rule sets
 
-Each subpackage with "contract only" status needs real implementations
-to be useful end-to-end. The contracts are stable; the rule sets are
-what consumers will reach for.
+The first concrete normalize/repair rules have landed:
 
-- **`normalize/`** — Tesseract taxonomy normalizer is the first
-  expected consumer. Likely shape: a `Normalizer` impl that applies
-  the layers from the architecture note (Unicode fold → slugify →
-  singularize via `gobuffalo/flect` or similar → alias map → reserved
-  guard → collision handling).
-- **`repair/`** — Envelope repairs are the highest-value first cut
-  (malformed JSON, wrong fenced-block language, deprecated MCP tool
-  names). The architecture doc lists the targets; deterministic ones
-  ship first, anything that changes semantics stays off-by-default.
+- **`normalize/`** — `SlugNormalizer` handles conservative slugify,
+  aliases, reserved guard, provenance, and optional simple singularize.
+  Tesseract-specific taxonomy/collision behavior should layer on top.
+- **`repair/`** — `MissingClosingDelimiterJSON` fixes obvious missing
+  terminal `}` / `]` cases only when the repaired document validates.
+  It is syntactic-only and does not add commas, quotes, keys, or values.
+
+Still useful follow-ups:
+
+- Wrong fenced-block language repair.
+- Deprecated MCP tool-name aliasing.
+- Missing-comma JSON repair, if we can keep it deterministic and
+  semantics-preserving.
 - **`event/`** — Schema only today. A reference emitter helper +
   fan-out sink (analogous to `runtimeevents.MultiSink`) would let
   filter consumers wire up easily. Defer until at least two consumers
@@ -48,17 +50,15 @@ domain (`hollis.deploy.*`, `git.*`, `filesystem.*`, etc.).
 
 ### Filter pipeline integration
 
-`go-agent-wrapper/wrapper.Config.Filters` is a `filters.Pipeline` field
-the wrapper exposes but doesn't invoke yet. A real `Pipeline`
-implementation would:
+`go-agent-wrapper/wrapper.Config.Filters` is now invoked by the wrapper.
+The wrapper also ships a `filters.RepairPipeline` adapter that composes
+`go-harness-filters/repair` repairers. A richer implementation could:
 
 - Wrap one or more `Repairer`s for envelope/JSON content.
 - Wrap one or more `Normalizer`s for tag/slug content.
 - Wrap a `Classifier` (often the same one the wrapper passes to
   `Policy` via `classifybridge`).
 - Emit per-event metadata back to the wrapper.
-
-That integration belongs in the wrapper when there's a real consumer.
 
 ## Open design questions
 
