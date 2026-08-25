@@ -4,6 +4,52 @@ All notable changes to go-harness-filters are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.1 — 2026-08-25
+
+Additive release of commit `57a6b09` ("Add concrete normalize and repair
+rules"). No breaking changes; every v0.1.0 API is unchanged. 37 tests
+across 5 packages, all `-race` clean. Tag cut after the fact, so the
+tagged tree does not contain this entry.
+
+### Added
+
+- **`normalize/` — `SlugNormalizer`, the first concrete normalizer.**
+  - `NewSlugNormalizer(Config) SlugNormalizer` plus the exported
+    `SlugNormalizer` struct (`Config`, `Singularize`).
+  - Conservative slugify: lowercase, whitespace/`-`/`_`/`/`/`.` and any
+    unknown punctuation collapse to a single hyphen, ends trimmed.
+  - Aliases apply after the slug pass and are themselves slugified, so
+    `"front end" -> "frontend"` matches whichever spelling the caller
+    configured. Matched aliases set `AliasOf` and
+    `Reason = "normalize.alias"`.
+  - Reserved terms are compared slug-to-slug and rejected with
+    `Reason = "normalize.reserved"`; a value that slugifies to nothing is
+    rejected with `Reason = "normalize.empty"`.
+  - `Singularize` opt-in strips a trailing `s` from each hyphen-separated
+    word longer than three characters that does not end in `ss`.
+    Deliberately basic — richer morphology belongs in the consuming
+    taxonomy, not in a generic normalizer.
+
+- **`repair/` — `Chain` composition and the first concrete repairer.**
+  - `Chain []Repairer` applies repairers in order, returns the first
+    result with `Repaired=true`, and skips nil members. Later rules never
+    see already-repaired content.
+  - `MissingClosingDelimiterJSON` appends missing terminal `}` / `]`
+    delimiters, and only when the repaired document validates as JSON.
+    Syntactic-only: it never inserts commas, quotes, keys, or values, and
+    it reports `SemanticChange=false` with
+    `RuleID = "json.missing-closing-delimiter"`. It declines any `Input`
+    whose `Kind` is set to something other than `json` or `envelope`, and
+    declines unterminated strings, mismatched delimiters, and
+    missing-value documents rather than guessing.
+
+### Notes
+
+- `normalize/` and `repair/` move from contract-only to callable; `event/`
+  still ships its schema with no reference emitter helper. README and
+  ROADMAP were updated in the same commit.
+- No new module dependencies — `go.mod` still has zero requires.
+
 ## v0.1.0 — 2026-05-26
 
 Initial cut. 27 tests across 5 packages, all `-race` clean. Two
