@@ -3,11 +3,11 @@
 //
 // Examples (from the harness filters architecture note):
 //
-//   @nanite:recover-session short_code=c287 history=last_50
-//   @torque:block task=CW-20260525-0001 reason="missing context after reboot"
-//   @fragment:capture kind=decision title="Use Cerberus for Nanite deploys"
-//   @stack-explorer:index path=apps/nanite include=go,ts,tsx
-//   @hadron:record-flow name="admin agent CRUD"
+//	@nanite:recover-session short_code=c287 history=last_50
+//	@torque:block task=CW-20260525-0001 reason="missing context after reboot"
+//	@fragment:capture kind=decision title="Use Cerberus for Nanite deploys"
+//	@stack-explorer:index path=apps/nanite include=go,ts,tsx
+//	@hadron:record-flow name="admin agent CRUD"
 //
 // Parsing is deterministic-first. LLM classification is reserved for
 // ambiguous prose; the parser in this package only handles the

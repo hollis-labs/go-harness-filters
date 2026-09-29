@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version-file: go.mod
           check-latest: true
 
       - name: go fmt (verify)
@@ -30,7 +30,7 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.6
+          version: v2.11.4
 
       - name: go test -race
         run: go test -race -count=1 ./...
