@@ -114,7 +114,7 @@ func validateIdent(s string) error {
 		return errors.New("empty")
 	}
 	for _, r := range s {
-		if !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-') {
+		if !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-' {
 			return fmt.Errorf("invalid character %q (allowed: a-z 0-9 -)", r)
 		}
 	}
@@ -135,7 +135,7 @@ func validateKey(s string) error {
 		return errors.New("empty")
 	}
 	for _, r := range s {
-		if !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-' || r == '_') {
+		if !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-' && r != '_' {
 			return fmt.Errorf("invalid character %q (allowed: a-z 0-9 - _)", r)
 		}
 	}
